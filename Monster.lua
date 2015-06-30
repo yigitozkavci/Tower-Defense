@@ -1,6 +1,11 @@
-Monster = {}
+local Monster = {}
+Monster.__index = Monster
 function Monster.create(health)
-	monster = {}
-	monster.health = health
-	return monster
+	local self = setmetatable({}, Monster)
+	self.health = health
+	return self
 end
+function Monster:getShout()
+	return "hrr"
+end
+return Monster
