@@ -10,6 +10,7 @@ monsterMoveTimer = 0
 monsterMoveTimerMax = 30
 currentWave = {}
 debug = {}
+
 function love.keypressed(key)
 	local x, y = platform:getCursor()
 	if key == "down" then

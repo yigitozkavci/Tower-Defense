@@ -11,18 +11,19 @@ end
 function Monster:followRoad(road)
 	local x = math.floor(self.x/gridSize)
 	local y = math.floor(self.y/gridSize)
-	self.x = self.x+1
-	wow = { x+1, y }
-	debug[1] = wow[1]
+
 	for i, coordinates in ipairs(road) do
-		if { x+1, y } == coordinates then
-			self.x = self.x+1
-		elseif { x-1, y } == coordinates then
-			self.x = self.x-1
-		elseif { x, y+1 } == coordinates then
-			self.y = self.y+1
-		elseif { x, y-1 } == coordinates then	
-			self.y = self.y-1
+		
+		if coordinates[1] == x and coordinates[2] == y then
+			if coordinates[3] == 1 then
+				self.x = self.x - 1
+			elseif coordinates[3] == 2 then
+				self.x = self.x + 1
+			elseif coordinates[3] == 4 then
+				self.y = self.y - 1
+			elseif coordinates[3] == 8 then
+				self.y = self.y + 1
+			end
 		end
 	end
 end

@@ -2,6 +2,9 @@ local Platform = {}
 Platform.__index = Platform
 
 currentRoad = {}
+
+DIRECTION = {LEFT = 1, RIGHT = 2, UP = 4, DOWN = 8}
+
 function Platform.create()
 	local self = setmetatable({}, Platform)
 
@@ -48,23 +51,28 @@ function Platform:drawLevel(level)
 	road = {}
 	road.color = {255, 255, 255}
 	if level == 1 then
-		for i=1, 20 do
-			table.insert(road, {i, 1})
+		for i=1, 19 do
+			table.insert(road, {i, 1, DIRECTION.RIGHT})
+		end
+		for i=2, 20 do
+			table.insert(road, {i, 5, DIRECTION.LEFT})
 		end
 		for i=1, 20 do
-			table.insert(road, {i, 5})
+			table.insert(road, {i, 11, DIRECTION.RIGHT})
 		end
-		for i=1, 20 do
-			table.insert(road, {i, 11})
-		end
-		table.insert(road, {20, 2})
-		table.insert(road, {20, 3})
-		table.insert(road, {20, 4})
-		table.insert(road, {1, 6})
-		table.insert(road, {1, 7})
-		table.insert(road, {1, 8})
-		table.insert(road, {1, 9})
-		table.insert(road, {1, 10})
+
+		table.insert(road, {20, 1, DIRECTION.DOWN})
+		table.insert(road, {1, 5, DIRECTION.DOWN})
+
+		table.insert(road, {20, 2, DIRECTION.DOWN})
+		table.insert(road, {20, 3, DIRECTION.DOWN})
+		table.insert(road, {20, 4, DIRECTION.DOWN})
+		table.insert(road, {1, 6, DIRECTION.DOWN})
+		table.insert(road, {1, 7, DIRECTION.DOWN})
+		table.insert(road, {1, 8, DIRECTION.DOWN})
+		table.insert(road, {1, 9, DIRECTION.DOWN})
+		table.insert(road, {1, 10, DIRECTION.DOWN})
+
 		love.graphics.setColor(255, 255, 255)
 		love.graphics.draw(house96x128, gridSize*19, gridSize*7)
 		self:drawRoad(road)
