@@ -2,6 +2,7 @@
 Platform = require("Platform")
 platform = Platform.create()
 Monster = require("Monster")
+Tower = require("Tower")
 
 monsterCreateTimer = 0
 monsterCreateTimerMax = 1000
@@ -10,6 +11,8 @@ monsterMoveTimer = 0
 monsterMoveTimerMax = 30
 currentWave = {}
 debug = {}
+
+local towers = {}
 
 function love.keypressed(key)
 	local x, y = platform:getCursor()
@@ -27,6 +30,8 @@ function love.keypressed(key)
 end
 function love.mousepressed(x, y, button)
 	debug[1] = "Mouse clicked to x: " .. platform:getCursor().x .. ", y: " .. platform:getCursor().y
+	local tower = Tower.create(platform:getCursor().x, platform:getCursor().y)
+	table.insert(towers, tower)
 end
 function drawDebug()
 	love.graphics.print(#debug)
@@ -45,11 +50,13 @@ function love.load()
 	dirtImage = love.graphics.newImage('assets/img/dirt32x.png')
 	house96x128 = love.graphics.newImage('assets/img/house96x128.png')
 	
+	platform:loadLevel(1);
+
 end
 function love.update(dt)
 	monsterCreateTimer = monsterCreateTimer + dt*1000
 	monsterMoveTimer = monsterMoveTimer + dt*1000
-	if(monsterCreateTimer > monsterCreateTimerMax) then
+	if(monsterCreateTimer > monsterCreateTimerMax) and table.getn(currentWave) < 10 then
 		monsterCreateTimer = 0
 		local monster = Monster.create(math.random(50, 100))
 		monster.color = getRandomColor()
@@ -57,11 +64,17 @@ function love.update(dt)
 	end
 	if(monsterMoveTimer > monsterMoveTimerMax) then
 		for i, monster in ipairs(currentWave) do
-
-			monster:followRoad(platform:getRoad())
-
+			if monster.dead then
+				table.remove(currentWave, i)
+			end
+			monster:update(dt, platform:getRoad())
 		end
 	end
+
+	for i,v in ipairs(towers) do
+		v:update(dt, currentWave)
+	end
+
 	local x, y = love.mouse.getPosition()
 	platform:setCursor(math.floor(x/32), math.floor(y/32))
 end
@@ -69,6 +82,10 @@ function love.draw()
 	platform:setGrass()
 	platform:drawLevel(1)
 	platform:drawCursor()
+
+	for i,v in ipairs(towers) do
+		v:draw()
+	end
 
 	drawDebug()
 	for i, monster in ipairs(currentWave) do
