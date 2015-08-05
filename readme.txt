@@ -1,3 +1,6 @@
+<h3>Builds</h3>
+<p>A Windows build of the game is ready in the Builds folder. (The build is ready, but not the game, keep in mind :V)</p>
+
 This is an open-source tower defense game built with lua & love framework. 
 
 Since I am not a pixel-art guy, most of the pixel images are found from the internet from their original disclaimers who I will be giving credits below.
