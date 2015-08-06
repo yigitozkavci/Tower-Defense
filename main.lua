@@ -14,6 +14,8 @@ debug = {}
 
 local towers = {}
 
+local state = "loading"
+
 function love.keypressed(key)
 	local x, y = platform:getCursor()
 	if key == "down" then
@@ -52,43 +54,50 @@ function love.load()
 	
 	platform:loadLevel(1);
 
+	state = "running"
 end
 function love.update(dt)
-	monsterCreateTimer = monsterCreateTimer + dt*1000
-	monsterMoveTimer = monsterMoveTimer + dt*1000
-	if(monsterCreateTimer > monsterCreateTimerMax) and table.getn(currentWave) < 10 then
-		monsterCreateTimer = 0
-		local monster = Monster.create(math.random(50, 100))
-		monster.color = getRandomColor()
-		table.insert(currentWave, monster)
-	end
-	if(monsterMoveTimer > monsterMoveTimerMax) then
-		for i, monster in ipairs(currentWave) do
-			if monster.dead then
-				table.remove(currentWave, i)
-			end
-			monster:update(dt, platform:getRoad())
+	if state == "running" then
+		monsterCreateTimer = monsterCreateTimer + dt*1000
+		monsterMoveTimer = monsterMoveTimer + dt*1000
+		if(monsterCreateTimer > monsterCreateTimerMax) and table.getn(currentWave) < 10 then
+			monsterCreateTimer = 0
+			local monster = Monster.create(math.random(50, 100))
+			monster.color = getRandomColor()
+			monster.x = platform.level.spawn.x * gridSize
+			monster.y = platform.level.spawn.y * gridSize
+			table.insert(currentWave, monster)
 		end
-	end
+		if(monsterMoveTimer > monsterMoveTimerMax) then
+			for i, monster in ipairs(currentWave) do
+				if monster.dead then
+					table.remove(currentWave, i)
+				end
+				monster:update(dt, platform:getRoad())
+			end
+		end
 
-	for i,v in ipairs(towers) do
-		v:update(dt, currentWave)
-	end
+		for i,v in ipairs(towers) do
+			v:update(dt, currentWave)
+		end
 
-	local x, y = love.mouse.getPosition()
-	platform:setCursor(math.floor(x/32), math.floor(y/32))
+		local x, y = love.mouse.getPosition()
+		platform:setCursor(math.floor(x/32), math.floor(y/32))
+	end
 end
 function love.draw()
-	platform:setGrass()
-	platform:drawLevel(1)
-	platform:drawCursor()
+	--if state == "running" then
+		platform:setGrass()
+		platform:drawLevel()
+		platform:drawCursor()
 
-	for i,v in ipairs(towers) do
-		v:draw()
-	end
+		for i,v in ipairs(towers) do
+			v:draw()
+		end
 
-	drawDebug()
-	for i, monster in ipairs(currentWave) do
-		platform:drawMonster(monster)
-	end
+		drawDebug()
+		for i, monster in ipairs(currentWave) do
+			platform:drawMonster(monster)
+		end
+	--end
 end

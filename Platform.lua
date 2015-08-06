@@ -1,8 +1,6 @@
 local Platform = {}
 Platform.__index = Platform
 
-currentRoad = {}
-
 Platform.Direction = {Left = 1, Right = 2, Up = 4, Down = 8}
 
 function Platform.create()
@@ -14,7 +12,7 @@ function Platform.create()
 	cursor.color = { 0, 0, 200 }
 	self.cursor = cursor
 
-	self.currentLevel = {}
+	self.level = {loaded = false}
 
 	return self
 end
@@ -29,17 +27,60 @@ function str_split(input, delimiter)
 	return t
 end
 
+function letterToDirection(letter)
+	if letter == "L" then
+		return Platform.Direction.Left
+	elseif letter == "R" then
+		return Platform.Direction.Right
+	elseif letter == "U" then
+		return Platform.Direction.Up
+	elseif letter == "D" then
+		return Platform.Direction.Down
+	end
+end
+
 function Platform:loadLevel(level)
 	local contents, size = love.filesystem.read("assets/levels/level"..level..".tdl")
-	
-	local lines = str_split(contents, "\n")
 
-	local readingMetadata = false
+	local level = {}
 
-	if lines[1] == "TDLevelFile V1.0" then
-		for i,v in ipairs(lines) do
-			--TODO read the damn level already...
+	if string.match(contents, "^TDLevelFile V1.0\r\n") then
+		local metadataStr = string.match(contents, "Start Metadata\r\n(.*)End Metadata")
+
+		local roadStr = string.match(contents, "Start Road\r\n(.*)End Road")
+
+		local name = string.match(metadataStr, "name%s+(.-)\r\n")
+		local spawnX, spawnY = string.match(metadataStr, "spawn%s+(%d-),(%d-)\r\n")
+		local endX, endY = string.match(metadataStr, "end%s+(%d-),(%d-)\r\n")
+		local waveCount = string.match(metadataStr, "waveCount%s+(%d-)\r\n")
+
+		level.name = name
+		level.spawn = {x = spawnX, y = spawnY}
+		level.endPoint = {x = endX, y = endY}
+		level.waveCount = waveCount
+		level.road = {}
+
+		print("Level Name: "..name)
+		print("spawn at x: "..spawnX.." y: "..spawnY)
+		print("end at x: "..endX.." y: "..endY)
+
+		local roadTiles = str_split(roadStr, "\r\n")
+
+		for i,v in ipairs(roadTiles) do
+			local tileX, tileY, d1, d2 = string.match(v, "T%s+(%d-),(%d-),(.)(.)")
+			if tileX == nil then
+				print("Tile skipped. Wrong format")
+			else
+				table.insert(level.road, {tonumber(tileX), tonumber(tileY), letterToDirection(d2), letterToDirection(d1)})
+			end
 		end
+
+		print(level.road[1][3])
+
+		level.loaded = true
+
+		self.level = level
+
 	else
 		print("Level file corrupted")
 	end
@@ -78,42 +119,13 @@ function Platform:setGrass()
 		end
 	end
 end
-function Platform:drawLevel(level)
-	road = {}
-	road.color = {255, 255, 255}
-	if level == 1 then
-		for i=1, 19 do
-			table.insert(road, {i, 1, Platform.Direction.Right, Platform.Direction.Right})
-		end
-		for i=2, 19 do
-			table.insert(road, {i, 5, Platform.Direction.Left, Platform.Direction.Left})
-		end
-		for i=2, 20 do
-			table.insert(road, {i, 11, Platform.Direction.Right, Platform.Direction.Right})
-		end
-
-		table.insert(road, {1, 11, Platform.Direction.Right, Platform.Direction.Down})
-		table.insert(road, {20, 1, Platform.Direction.Down, Platform.Direction.Right})
-		table.insert(road, {1, 5, Platform.Direction.Down, Platform.Direction.Left})
-		table.insert(road, {20, 5, Platform.Direction.Left, Platform.Direction.Down})
-
-		table.insert(road, {20, 2, Platform.Direction.Down, Platform.Direction.Down})
-		table.insert(road, {20, 3, Platform.Direction.Down, Platform.Direction.Down})
-		table.insert(road, {20, 4, Platform.Direction.Down, Platform.Direction.Down})
-		table.insert(road, {1, 6, Platform.Direction.Down, Platform.Direction.Down})
-		table.insert(road, {1, 7, Platform.Direction.Down, Platform.Direction.Down})
-		table.insert(road, {1, 8, Platform.Direction.Down, Platform.Direction.Down})
-		table.insert(road, {1, 9, Platform.Direction.Down, Platform.Direction.Down})
-		table.insert(road, {1, 10, Platform.Direction.Down, Platform.Direction.Down})
-
-		love.graphics.setColor(255, 255, 255)
-		love.graphics.draw(house96x128, gridSize*19, gridSize*7)
-		self:drawRoad(road)
-		currentRoad = road
-	end
+function Platform:drawLevel()
+	love.graphics.setColor(255, 255, 255)
+	love.graphics.draw(house96x128, gridSize*19, gridSize*7)
+	self:drawRoad(self.level.road)
 end
 function Platform:getRoad()
-	return currentRoad
+	return self.level.road
 end
 function Platform:drawMonster(monster)
 	love.graphics.setColor(monster.color)
