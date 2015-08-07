@@ -10,11 +10,17 @@ monsterCreateTimerMax = 1000
 monsterMoveTimer = 0
 monsterMoveTimerMax = 30
 currentWave = {}
+local waveNumber = 1
+
 debug = {}
 
 local towers = {}
 
 local state = "loading"
+
+local waitTimer = 0
+
+decorations = {}
 
 function love.keypressed(key)
 	local x, y = platform:getCursor()
@@ -46,13 +52,21 @@ end
 function getRandomColor()
 	return { math.random(0, 255), math.random(0, 255), math.random(0, 255) }
 end
+
+function wait(seconds)
+	state = "waiting"
+	waitTimer = seconds
+end
+
 function love.load()
 
 	grassImage = love.graphics.newImage('assets/img/grass32x.png')
 	dirtImage = love.graphics.newImage('assets/img/dirt32x.png')
 	house96x128 = love.graphics.newImage('assets/img/house96x128.png')
 	
-	platform:loadLevel(1);
+	decorations["house"] = house96x128
+
+	platform:loadLevel(1)
 
 	state = "running"
 end
@@ -60,10 +74,9 @@ function love.update(dt)
 	if state == "running" then
 		monsterCreateTimer = monsterCreateTimer + dt*1000
 		monsterMoveTimer = monsterMoveTimer + dt*1000
-		if(monsterCreateTimer > monsterCreateTimerMax) and table.getn(currentWave) < 10 then
+		if(monsterCreateTimer > monsterCreateTimerMax) and table.getn(platform.level.waves[waveNumber]) > 0 then
 			monsterCreateTimer = 0
-			local monster = Monster.create(math.random(50, 100))
-			monster.color = getRandomColor()
+			local monster = table.remove(platform.level.waves[waveNumber])
 			monster.x = platform.level.spawn.x * gridSize
 			monster.y = platform.level.spawn.y * gridSize
 			table.insert(currentWave, monster)
@@ -81,23 +94,42 @@ function love.update(dt)
 			v:update(dt, currentWave)
 		end
 
-		local x, y = love.mouse.getPosition()
-		platform:setCursor(math.floor(x/32), math.floor(y/32))
+		if table.getn(platform.level.waves[waveNumber]) == 0 and table.getn(currentWave) == 0 then
+			wait(5)
+			waveNumber = waveNumber + 1
+			print("Wave "..waveNumber)
+			if waveNumber > platform.level.waveCount then
+				print("Level finished")
+				print("YOU WIN")
+				state = "endgame"
+			end
+		end
+	elseif state == "waiting" then
+		waitTimer = waitTimer - dt
+		if waitTimer < 0 then
+			state = "running"
+		end
+	elseif state == "endgame" then
+		--TODO fireworks and shit goes here
 	end
+	local x, y = love.mouse.getPosition()
+	platform:setCursor(math.floor(x/32), math.floor(y/32))
 end
 function love.draw()
-	--if state == "running" then
-		platform:setGrass()
-		platform:drawLevel()
-		platform:drawCursor()
+	platform:setGrass()
+	platform:drawLevel()
+	platform:drawCursor()
 
-		for i,v in ipairs(towers) do
-			v:draw()
-		end
+	for i,v in ipairs(towers) do
+		v:draw()
+	end
 
-		drawDebug()
-		for i, monster in ipairs(currentWave) do
-			platform:drawMonster(monster)
-		end
-	--end
+	drawDebug()
+	for i, monster in ipairs(currentWave) do
+		platform:drawMonster(monster)
+	end
+	if state == "endgame" then
+		love.graphics.setColor({0, 0, 255})
+		love.graphics.print("YOU'RE WINNER", love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, 0, 4, 4)
+	end
 end

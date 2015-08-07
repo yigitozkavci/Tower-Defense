@@ -76,3 +76,14 @@ Start Road
 	T 19,11,RR
 	T 20,11,RR
 End Road
+Start Wave 1
+	E 10,EnemyType1
+End Wave
+Start Wave 2
+	E 5,EnemyType1
+	E 2,Speeder
+End Wave
+Start Decoration
+	D 19,7,house
+	D 2,6,house
+End Decoration

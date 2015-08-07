@@ -1,0 +1,47 @@
+See level1.tdl.
+It's really self explanatory, but I'll go over a few things here.
+
+You have to start the file with this line: 
+TDLevelFile V1.0
+It currently has no use. But you have to do it, because I set it like that. :V
+
+You have to start a block with "Start [block]\r\n" and end a block with "End [block]" (line-break is optional at the end)
+
+You have to use Windows line-endings.(View->Line Endings->Windows in Sublime Text 3)
+
+-Metadata block-
+Metadata block is required for each level. You can use the example level file (level1.tdl) as a cheat sheet. You should add every data field on the example level the level that you create. (Except roadTileCount. It is never being checked in the game :D, It may become required someday though)
+
+-Road block-
+Each line that is starting with "T" represents a tile.(Can have different characters in the beginning(like tabs or comments.). But that T should be seen by the program.) Lines starting without "T" or written in wrong format will just print a log message on console.
+After "T" you may put as many whitespace characters as you want. Then you have to define the coordinates of the tile.
+
+T 1,2,RR
+
+First number represents the x coordinate and second one represents the y coordinate of the tile. You CAN'T have any whitespace characters between commas and numbers.
+The letters represent direction of the path. 
+R = Right 
+L = Left 
+U = Up 
+D = Down
+
+First letter is the direction when an enemy is coming towards the tile. Second one is when the enemy is leaving the tile. 
+
+
+Other blocks have very similar rules with a few different arguments in each line.
+
+-Waves-
+You can define your waves in these blocks. These blocks start with a number next to the starting line. Syntax is basic:
+E[Whitespace][NumberOfEnemies],[EnemyType]
+
+Beware!! Enemies start coming from last line to first line. Don't start the wave with a boss fight accidentally. :D
+
+You should also set the waveCount data in your Metadata block. The game will look for that value when loading waves. If you define your 15th wave but you set your wave count to 13, the game won't see the 14th and 15th waves.
+
+-Decoration Block-
+Simple syntax:
+D[Whitespace][X Coordinate],[Y Coordinate],[Decoration Name]
+
+Decoration Name must be defined in the game too.
+
+Wrong decoration names will probably crash the game.(For now)

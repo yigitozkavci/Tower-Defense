@@ -49,6 +49,8 @@ function Platform:loadLevel(level)
 
 		local roadStr = string.match(contents, "Start Road\r\n(.*)End Road")
 
+		local decorationStr = string.match(contents, "Start Decoration\r\n(.*)End Decoration")
+
 		local name = string.match(metadataStr, "name%s+(.-)\r\n")
 		local spawnX, spawnY = string.match(metadataStr, "spawn%s+(%d-),(%d-)\r\n")
 		local endX, endY = string.match(metadataStr, "end%s+(%d-),(%d-)\r\n")
@@ -57,8 +59,12 @@ function Platform:loadLevel(level)
 		level.name = name
 		level.spawn = {x = spawnX, y = spawnY}
 		level.endPoint = {x = endX, y = endY}
-		level.waveCount = waveCount
+		level.waveCount = tonumber(waveCount)
 		level.road = {}
+
+		level.waves = {}
+
+		level.decoration = {}
 
 		print("Level Name: "..name)
 		print("spawn at x: "..spawnX.." y: "..spawnY)
@@ -72,6 +78,34 @@ function Platform:loadLevel(level)
 				print("Tile skipped. Wrong format")
 			else
 				table.insert(level.road, {tonumber(tileX), tonumber(tileY), letterToDirection(d2), letterToDirection(d1)})
+			end
+		end
+
+		for i=1,waveCount do
+			level.waves[i] = {}
+			local waveStr = string.match(contents, "Start Wave "..i.."\r\n(.-)End Wave")
+			print(waveStr)
+			local wave = str_split(waveStr, "\r\n")
+			for k,v in ipairs(wave) do
+				local e_count, e_type = string.match(v, "E%s+(%d-),(.+)")
+				if e_count == nil then
+					print("Enemy skipped. Wrong format.")
+				else
+					for j=1,tonumber(e_count) do
+						table.insert(level.waves[i], Monster.getPreset(e_type))
+					end
+				end
+			end
+		end
+
+		local decorationLines = str_split(decorationStr, "\r\n")
+
+		for i,v in ipairs(decorationLines) do
+			local decorX, decorY, decorName = string.match(v, "D%s+(%d-),(%d-),(.+)")
+			if decorX == nil then
+				print("Decoration skipped. Wrong format.")
+			else
+				table.insert(level.decoration, {x = tonumber(decorX), y = tonumber(decorY), name = decorName})
 			end
 		end
 
@@ -121,7 +155,9 @@ function Platform:setGrass()
 end
 function Platform:drawLevel()
 	love.graphics.setColor(255, 255, 255)
-	love.graphics.draw(house96x128, gridSize*19, gridSize*7)
+	for i,v in ipairs(self.level.decoration) do
+		love.graphics.draw(decorations[v.name], gridSize*v.x, gridSize*v.y)
+	end
 	self:drawRoad(self.level.road)
 end
 function Platform:getRoad()
@@ -130,6 +166,11 @@ end
 function Platform:drawMonster(monster)
 	love.graphics.setColor(monster.color)
 	love.graphics.circle("fill", monster.x+gridSize/2, monster.y+gridSize/2, gridSize/4, 100)
+
+	--draw HP bar
+	love.graphics.setColor({255 - 255 * (monster.health / monster.maxHealth), 255 * (monster.health / monster.maxHealth), 0})
+	love.graphics.rectangle("fill", monster.x + monster.width / 2 - 10, monster.y, 20 * (monster.health / monster.maxHealth), 5)
+
 end
 function Platform:drawCursor()
 	love.graphics.setColor(self.cursor.color)

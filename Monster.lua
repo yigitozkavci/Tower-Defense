@@ -14,10 +14,17 @@ function Monster.create(health)
 	self.speed = 64
 
 	self.health = health
+	self.maxHealth = health
 
 	self.dead = false
 
 	return self
+end
+
+function Monster.getPreset(name)
+	local file = love.filesystem.load("MonsterPresets/"..name..".lua")
+	local monster = file()
+	return monster
 end
 
 function Monster:update(dt, road) 
@@ -34,7 +41,7 @@ function Monster:followRoad(dt, road)
 	local y = math.floor((self.y)/gridSize)
 
 	for i, coordinates in ipairs(road) do
-		if self.x % gridSize < 2 and self.y % gridSize < 2 then
+		if self.x % gridSize < 4 and self.y % gridSize < 4 then
 			self.currentCoords.x = x
 			self.currentCoords.y = y
 		end
