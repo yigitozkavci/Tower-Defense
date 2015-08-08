@@ -1,0 +1,89 @@
+TDLevelFile V1.0
+Start Metadata
+	name Level 1
+	spawn 1,1
+	end 20,11
+	roadTileCount 68
+	waveCount 2
+End Metadata
+Start Road
+	T 1,1,RR
+	T 2,1,RR
+	T 3,1,RR
+	T 4,1,RR
+	T 5,1,RR
+	T 6,1,RR
+	T 7,1,RR
+	T 8,1,RR
+	T 9,1,RR
+	T 10,1,RR
+	T 11,1,RR
+	T 12,1,RR
+	T 13,1,RR
+	T 14,1,RR
+	T 15,1,RR
+	T 16,1,RR
+	T 17,1,RR
+	T 18,1,RR
+	T 19,1,RR
+	T 20,1,RD
+	T 20,2,DD
+	T 20,3,DD
+	T 20,4,DD
+	T 20,5,DL
+	T 19,5,LL
+	T 18,5,LL
+	T 17,5,LL
+	T 16,5,LL
+	T 15,5,LL
+	T 14,5,LL
+	T 13,5,LL
+	T 12,5,LL
+	T 11,5,LL
+	T 10,5,LL
+	T 9,5,LL
+	T 8,5,LL
+	T 7,5,LL
+	T 6,5,LL
+	T 5,5,LL
+	T 4,5,LL
+	T 3,5,LL
+	T 2,5,LL
+	T 1,5,LD
+	T 1,6,DD
+	T 1,7,DD
+	T 1,8,DD
+	T 1,9,DD
+	T 1,10,DD
+	T 1,11,DR
+	T 2,11,RR
+	T 3,11,RR
+	T 4,11,RR
+	T 5,11,RR
+	T 6,11,RR
+	T 7,11,RR
+	T 8,11,RR
+	T 9,11,RR
+	T 10,11,RR
+	T 11,11,RR
+	T 12,11,RR
+	T 13,11,RR
+	T 14,11,RR
+	T 15,11,RR
+	T 16,11,RR
+	T 17,11,RR
+	T 18,11,RR
+	T 19,11,RR
+	T 20,11,RR
+End Road
+Start Wave 1
+	E 10,EnemyType1
+End Wave
+Start Wave 2
+	E 5,EnemyType1
+	E 2,Speeder
+End Wave
+Start Decoration
+	D 19,7,house
+	D 2,6,house
+End Decoration
