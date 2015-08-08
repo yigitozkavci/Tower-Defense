@@ -1,4 +1,4 @@
-local monster = Monster.create(14)
+local monster = Monster.create(15)
 
 monster.width = 32
 monster.height = 32

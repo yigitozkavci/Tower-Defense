@@ -57,8 +57,8 @@ function Platform:loadLevel(level)
 		local waveCount = string.match(metadataStr, "waveCount%s+(%d-)\r\n")
 
 		level.name = name
-		level.spawn = {x = spawnX, y = spawnY}
-		level.endPoint = {x = endX, y = endY}
+		level.spawn = {x = tonumber(spawnX), y = tonumber(spawnY)}
+		level.endPoint = {x = tonumber(endX), y = tonumber(endY)}
 		level.waveCount = tonumber(waveCount)
 		level.road = {}
 
@@ -77,7 +77,7 @@ function Platform:loadLevel(level)
 			if tileX == nil then
 				print("Tile skipped. Wrong format")
 			else
-				table.insert(level.road, {tonumber(tileX), tonumber(tileY), letterToDirection(d2), letterToDirection(d1)})
+				level.road["x"..tileX.."y"..tileY] = {tonumber(tileX), tonumber(tileY), letterToDirection(d2), letterToDirection(d1)}
 			end
 		end
 
@@ -108,8 +108,6 @@ function Platform:loadLevel(level)
 				table.insert(level.decoration, {x = tonumber(decorX), y = tonumber(decorY), name = decorName})
 			end
 		end
-
-		print(level.road[1][3])
 
 		level.loaded = true
 

@@ -4,6 +4,8 @@ monster.width = 32
 monster.height = 32
 monster.speed = 40
 
+monster.damageModifiers.physical = 1
+
 monster.color = {255, 125, 0}
 
 return monster
