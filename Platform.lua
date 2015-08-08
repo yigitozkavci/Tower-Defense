@@ -44,17 +44,25 @@ function Platform:loadLevel(level)
 
 	local level = {}
 
-	if string.match(contents, "^TDLevelFile V1.0\r\n") then
-		local metadataStr = string.match(contents, "Start Metadata\r\n(.*)End Metadata")
+	-- Determining split character based on OS info in config file.
+	local splitCharacter = "\n"
+	if OS == "windows" then
+		local splitCharacter = "\r\n"
+	elseif OS == "mac" then
+		local splitCharacter = "\n"
+	end
 
-		local roadStr = string.match(contents, "Start Road\r\n(.*)End Road")
+	if string.match(contents, "^TDLevelFile V1.0"..splitCharacter.."") then
+		local metadataStr = string.match(contents, "Start Metadata"..splitCharacter.."(.*)End Metadata")
 
-		local decorationStr = string.match(contents, "Start Decoration\r\n(.*)End Decoration")
+		local roadStr = string.match(contents, "Start Road"..splitCharacter.."(.*)End Road")
 
-		local name = string.match(metadataStr, "name%s+(.-)\r\n")
-		local spawnX, spawnY = string.match(metadataStr, "spawn%s+(%d-),(%d-)\r\n")
-		local endX, endY = string.match(metadataStr, "end%s+(%d-),(%d-)\r\n")
-		local waveCount = string.match(metadataStr, "waveCount%s+(%d-)\r\n")
+		local decorationStr = string.match(contents, "Start Decoration"..splitCharacter.."(.*)End Decoration")
+
+		local name = string.match(metadataStr, "name%s+(.-)"..splitCharacter.."")
+		local spawnX, spawnY = string.match(metadataStr, "spawn%s+(%d-),(%d-)"..splitCharacter.."")
+		local endX, endY = string.match(metadataStr, "end%s+(%d-),(%d-)"..splitCharacter.."")
+		local waveCount = string.match(metadataStr, "waveCount%s+(%d-)"..splitCharacter.."")
 
 		level.name = name
 		level.spawn = {x = tonumber(spawnX), y = tonumber(spawnY)}
@@ -70,7 +78,7 @@ function Platform:loadLevel(level)
 		print("spawn at x: "..spawnX.." y: "..spawnY)
 		print("end at x: "..endX.." y: "..endY)
 
-		local roadTiles = str_split(roadStr, "\r\n")
+		local roadTiles = str_split(roadStr, ""..splitCharacter.."")
 
 		for i,v in ipairs(roadTiles) do
 			local tileX, tileY, d1, d2 = string.match(v, "T%s+(%d-),(%d-),(.)(.)")
@@ -83,9 +91,9 @@ function Platform:loadLevel(level)
 
 		for i=1,waveCount do
 			level.waves[i] = {}
-			local waveStr = string.match(contents, "Start Wave "..i.."\r\n(.-)End Wave")
+			local waveStr = string.match(contents, "Start Wave "..i..""..splitCharacter.."(.-)End Wave")
 			print(waveStr)
-			local wave = str_split(waveStr, "\r\n")
+			local wave = str_split(waveStr, ""..splitCharacter.."")
 			for k,v in ipairs(wave) do
 				local e_count, e_type = string.match(v, "E%s+(%d-),(.+)")
 				if e_count == nil then
@@ -98,7 +106,7 @@ function Platform:loadLevel(level)
 			end
 		end
 
-		local decorationLines = str_split(decorationStr, "\r\n")
+		local decorationLines = str_split(decorationStr, ""..splitCharacter.."")
 
 		for i,v in ipairs(decorationLines) do
 			local decorX, decorY, decorName = string.match(v, "D%s+(%d-),(%d-),(.+)")

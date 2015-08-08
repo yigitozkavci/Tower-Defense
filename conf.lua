@@ -1,6 +1,7 @@
-    gridSize = 32
+gridSize = 32
 width = 30
 height = 15
+OS = 'mac'
 function love.conf(t)
 
     t.identity = "save"                   -- The name of the save directory (string)
