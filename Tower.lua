@@ -39,7 +39,7 @@ function Tower.create(x, y)
 	self.damage = 15
 	self.damageType = Tower.DamageType.Physical
 	self.projectileType = Tower.ProjectileType.Normal
-	self.projectileSpeed = 180
+	self.projectileSpeed = TowerParams.TowerProjectileSpeed
 	self.attackSpeed = 0.8
 
 	self.attackTimer = 0
@@ -49,6 +49,14 @@ function Tower.create(x, y)
 	self.range = 100
 
 	self.sellPrice = 50
+
+	self.upgradeCosts = {
+		damage = TowerParams.TowerDamageUpgradeStartingCost,
+		attackRate = TowerParams.TowerAttackRateUpgradeStartingCost,
+		range = TowerParams.TowerRangeUpgradeStartingCost
+	}
+
+	self.focus = nil
 
 	return self
 end
@@ -68,6 +76,13 @@ function sign(value)
 	end
 end
 
+function Tower:setDamage(damage)
+	self.damage = damage
+	for k,v in pairs(self.projectiles) do
+		v.damage = damage
+	end
+end
+
 --Update method for tower.
 function Tower:update(dt, monsters)
 	self.attackTimer = self.attackTimer + dt
@@ -76,22 +91,38 @@ function Tower:update(dt, monsters)
 	if self.projectileType == Tower.ProjectileType.Normal then
 		if self.attackTimer > 1 / self.attackSpeed then
 			
-			self.attackTimer = 0
-			local minDistance = 10000;
-			local monster
-			for i,v in ipairs(monsters) do
-				local dist = distance(self, v)
-				if dist < minDistance then
-					monster = v
-					minDistance = dist
+
+			if self.focus ~= nil then
+				if distance(self, self.focus) <= self.range and not self.focus.dead then
+					table.insert(self.projectiles, {
+					x = self.x+self.width/2, y = self.y+self.height/2,
+					target = self.focus, damage = self.damage, damageType = self.damageType
+					})
+					self.attackTimer = 0
+				else
+					self.focus = nil
+				end
+			else
+				local minDistance = 10000
+				local monster
+				for i,v in ipairs(monsters) do
+					local dist = distance(self, v)
+					if dist < minDistance then
+						monster = v
+						minDistance = dist
+					end
+				end
+				if minDistance < self.range then
+					self.focus = monster
+					table.insert(self.projectiles, {
+						x = self.x+self.width/2, y = self.y+self.height/2,
+						target = monster, damage = self.damage, damageType = self.damageType
+						})
+					self.attackTimer = 0
 				end
 			end
-			if minDistance < self.range then
-				table.insert(self.projectiles, {
-					x = self.x+self.width/2, y = self.y+self.height/2,
-					target = monster, damage = self.damage, damageType = self.damageType
-					})
-			end
+
+
 		end
 
 		for i,v in ipairs(self.projectiles) do
@@ -158,6 +189,13 @@ function Tower:draw()
 		self:drawProjectile(v)
 	end
 end
+
+
+function Tower:drawRangeIndicator()
+	love.graphics.setColor({100, 100, 255})
+	love.graphics.circle("line", self.x + self.width / 2, self.y + self.height / 2, self.range, 50)
+end
+
 
 function Tower:drawProjectile(projectile)
 	love.graphics.setColor({255, 255, 255})

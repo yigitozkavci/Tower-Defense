@@ -3,6 +3,7 @@ Platform = require("Platform")
 platform = Platform.create()
 Monster = require("Monster")
 Tower = require("Tower")
+TowerParams = require("TowerParams")
 
 monsterCreateTimer = 0
 monsterCreateTimerMax = 1000
@@ -56,12 +57,6 @@ local pTypeToString = {
 	[Tower.ProjectileType.Laser] = "Laser"
 }
 
-local upgradeCosts = {
-	damage = 20,
-	attackRate = 20,
-	range = 20
-}
-
 function love.keypressed(key)
 	local x, y = platform:getCursor()
 	if state == "running" or state == "waiting" then
@@ -79,66 +74,67 @@ function love.keypressed(key)
 		elseif key == "q" then
 			if buildMode then
 				towerToBuild.damageType = Tower.DamageType.Physical
-				towerToBuild.sellPrice = 50
-				towerCost = 100
+				towerToBuild.sellPrice = TowerParams.TowerCost * TowerParams.TowerSellPriceMultiplier
+				towerCost = TowerParams.TowerCost
 			end
 		elseif key == "w" then
 			if buildMode then
 				towerToBuild.damageType = Tower.DamageType.Fire
-				towerToBuild.sellPrice = 75
-				towerCost = 150
+				towerToBuild.sellPrice = TowerParams.ElementalTowerCost * TowerParams.TowerSellPriceMultiplier
+				towerCost = TowerParams.ElementalTowerCost
 			end
 		elseif key == "e" then
 			if buildMode then
 				towerToBuild.damageType = Tower.DamageType.Frost
-				towerToBuild.sellPrice = 75
-				towerCost = 150
+				towerToBuild.sellPrice = TowerParams.ElementalTowerCost * TowerParams.TowerSellPriceMultiplier
+				towerCost = TowerParams.ElementalTowerCost
 			end
 		elseif key == "r" then
 			if buildMode then
 				towerToBuild.damageType = Tower.DamageType.Lightning
-				towerToBuild.sellPrice = 75
-				towerCost = 150
+				towerToBuild.sellPrice = TowerParams.ElementalTowerCost * TowerParams.TowerSellPriceMultiplier
+				towerCost = TowerParams.ElementalTowerCost
 			end
 		elseif key == "a" then
 			if buildMode then
 				towerToBuild.projectileType = Tower.ProjectileType.Normal
-				towerToBuild.damage = 15
-				towerToBuild.attackSpeed = 0.8
+				towerToBuild.damage = TowerParams.StandardTowerDamage
+				towerToBuild.attackSpeed = TowerParams.StandardTowerAttackRate
 			elseif upgradeMode then
-				if money >= upgradeCosts.damage then
-					upgradeTower.damage = upgradeTower.damage + 2
-					money = money - upgradeCosts.damage
-					towerToBuild.sellPrice = towerToBuild.sellPrice + upgradeCosts.damage / 2
-					upgradeCosts.damage = upgradeCosts.damage + 5
+				if money >= upgradeTower.upgradeCosts.damage then
+					upgradeTower:setDamage(upgradeTower.damage + TowerParams.UpgradeDamageIncrease)
+					money = money - upgradeTower.upgradeCosts.damage
+					towerToBuild.sellPrice = towerToBuild.sellPrice + upgradeTower.upgradeCosts.damage * TowerParams.TowerSellPriceMultiplier
+					upgradeTower.upgradeCosts.damage = upgradeTower.upgradeCosts.damage + TowerParams.TowerDamageUpgradeCostIncrease
 				end
 			end
 		elseif key == "s" then
 			if buildMode then
 				towerToBuild.projectileType = Tower.ProjectileType.Laser
-				towerToBuild.damage = 1
-				towerToBuild.attackSpeed = 4
+				towerToBuild.damage = TowerParams.LaserTowerDamage
+				towerToBuild.attackSpeed = TowerParams.LaserTowerAttackRate
 			elseif upgradeMode then
-				if money >= upgradeCosts.attackRate then
-					upgradeTower.attackSpeed = upgradeTower.attackSpeed + 0.2
-					money = money - upgradeCosts.attackRate
-					towerToBuild.sellPrice = towerToBuild.sellPrice + upgradeCosts.attackRate / 2
-					upgradeCosts.attackRate = upgradeCosts.attackRate + 5
+				if money >= upgradeTower.upgradeCosts.attackRate then
+					upgradeTower.attackSpeed = upgradeTower.attackSpeed + TowerParams.UpgradeAttackRateIncrease
+					money = money - upgradeTower.upgradeCosts.attackRate
+					towerToBuild.sellPrice = towerToBuild.sellPrice + upgradeTower.upgradeCosts.attackRate * TowerParams.TowerSellPriceMultiplier
+					upgradeTower.upgradeCosts.attackRate = upgradeTower.upgradeCosts.attackRate + TowerParams.TowerAttackRateUpgradeCostIncrease
 				end
 			end
 		elseif key == "d" then
 			if upgradeMode then
-				if money >= upgradeCosts.range then
-					upgradeTower.range = upgradeTower.range + 15
-					money = money - upgradeCosts.range
-					towerToBuild.sellPrice = towerToBuild.sellPrice + upgradeCosts.range / 2
-					upgradeCosts.range = upgradeCosts.range + 5
+				if money >= upgradeTower.upgradeCosts.range then
+					upgradeTower.range = upgradeTower.range + TowerParams.UpgradeRangeIncrease
+					money = money - upgradeTower.upgradeCosts.range
+					towerToBuild.sellPrice = towerToBuild.sellPrice + upgradeTower.upgradeCosts.range * TowerParams.TowerSellPriceMultiplier
+					upgradeTower.upgradeCosts.range = upgradeTower.upgradeCosts.range + TowerParams.TowerRangeUpgradeCostIncrease
 				end
 			end
 		elseif key == "l" then
 			if upgradeMode then
 				money = money + upgradeTower.sellPrice
 				towers[upgradeTowerIndex] = nil
+				upgradeMode = false
 			end
 		elseif key == "b" then
 			buildMode = not buildMode
@@ -229,7 +225,7 @@ function drawHUD()
 				"Damage: "..upgradeTower.damage.."\n"..
 				"Attack Rate: "..upgradeTower.attackSpeed.."\n"..
 				"Range: "..upgradeTower.range.."\n"..
-				"A, S, D to upgrade stats.(Costs:"..upgradeCosts.damage..","..upgradeCosts.attackRate..","..upgradeCosts.range..")\n"..
+				"A, S, D to upgrade stats.(Costs:"..upgradeTower.upgradeCosts.damage..","..upgradeTower.upgradeCosts.attackRate..","..upgradeTower.upgradeCosts.range..")\n"..
 				"L to sell the tower.(Take "..upgradeTower.sellPrice.." back)",  love.graphics.getWidth() - 170, 120, 170, "left")
 		else
 			love.graphics.printf("Press B to go into buy mode. Click on a tower to see upgrade options.",  love.graphics.getWidth() - 170, 120, 170, "left")
@@ -338,10 +334,39 @@ function love.update(dt)
 	local x, y = love.mouse.getPosition()
 	platform:setCursor(math.floor(x/32), math.floor(y/32))
 end
+
+function drawUpgradeCursor()
+	love.graphics.setColor({100, 255, 10})
+	love.graphics.rectangle("line", upgradeTower.x, upgradeTower.y, upgradeTower.width, upgradeTower.height)
+
+	upgradeTower:drawRangeIndicator()
+
+end
+
+function drawBuildModeCursor()
+	local x, y = platform:getCursor().x, platform:getCursor().y
+	love.graphics.setColor({200, 120, 0})
+	love.graphics.rectangle("line", x*gridSize, y*gridSize, gridSize, gridSize)
+
+	towerToBuild.x = x*gridSize
+	towerToBuild.y = y*gridSize
+
+	towerToBuild:drawRangeIndicator()
+
+end
+
 function love.draw()
 	platform:setGrass()
 	platform:drawLevel()
 	platform:drawCursor()
+
+	if upgradeMode then
+		drawUpgradeCursor()
+	end
+
+	if buildMode then
+		drawBuildModeCursor()
+	end
 
 	for i,v in pairs(towers) do
 		v:draw()
