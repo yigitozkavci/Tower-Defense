@@ -185,11 +185,19 @@ function drawDebug()
 end
 
 function drawHUD()
+
 	love.graphics.setColor(255, 255, 255)
-	love.graphics.draw(hudIcons.dmgTypePhysical, 10, love.graphics.getHeight() - (56 - (56 * buildModeAnimTimer/0.4)))
-	love.graphics.draw(hudIcons.dmgTypeFire, 10 + (10 + 48), love.graphics.getHeight() - (56 - (56 * buildModeAnimTimer/0.4)))
-	love.graphics.draw(hudIcons.dmgTypeFrost, 10 + (10 + 48) * 2, love.graphics.getHeight() - (56 - (56 * buildModeAnimTimer/0.4)))
-	love.graphics.draw(hudIcons.dmgTypeLightning, 10 + (10 + 48) * 3, love.graphics.getHeight() - (56 - (56 * buildModeAnimTimer/0.4)))
+
+	if towerToBuild ~= nil then
+		love.graphics.draw((towerToBuild.damageType == Tower.DamageType.Physical) and hudIcons.dmgTypePhysicalSelected or hudIcons.dmgTypePhysical,
+			10, love.graphics.getHeight() - (56 - (56 * buildModeAnimTimer/0.4)))
+		love.graphics.draw((towerToBuild.damageType == Tower.DamageType.Fire) and hudIcons.dmgTypeFireSelected or hudIcons.dmgTypeFire,
+			10 + (10 + 48), love.graphics.getHeight() - (56 - (56 * buildModeAnimTimer/0.4)))
+		love.graphics.draw((towerToBuild.damageType == Tower.DamageType.Frost) and hudIcons.dmgTypeFrostSelected or hudIcons.dmgTypeFrost,
+			10 + (10 + 48) * 2, love.graphics.getHeight() - (56 - (56 * buildModeAnimTimer/0.4)))
+		love.graphics.draw((towerToBuild.damageType == Tower.DamageType.Lightning) and hudIcons.dmgTypeLightningSelected or hudIcons.dmgTypeLightning, 
+			10 + (10 + 48) * 3, love.graphics.getHeight() - (56 - (56 * buildModeAnimTimer/0.4)))
+	end
 
 
 	love.graphics.draw(hudIcons.moneyDisplay, love.graphics.getWidth() - 120, love.graphics.getHeight() - 50)

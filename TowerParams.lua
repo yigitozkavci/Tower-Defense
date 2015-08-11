@@ -22,8 +22,20 @@ TowerParams = {
 	TowerProjectileSpeed = 180, --pixels per second
 
 
+	onFireTimer = 2,
+	onFireDOTTickTimer = 0.5, --seconds
+	onFireDOTDamage = 4,
+
+	slowDebuffTime = 2, --seconds
+	slowDebuffSlowAmount = 0.7,
+
+	shockTimer = 2, --seconds
+	shockDamageAmplifier = 0.1,
+	shockDamageMaxStack = 4,
+
+
 	TowerCost = 100,
-	ElementalTowerCost = 150, --Elemental damage has no effect in the game for now.
+	ElementalTowerCost = 150,
 
 	TowerSellPriceMultiplier = 0.5 --Towers can be sold for half of their costs.
 }
