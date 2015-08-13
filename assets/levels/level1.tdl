@@ -77,9 +77,18 @@ Start Road
 	T 20,11,RR
 End Road
 Start Wave 1
+	Start Metadata
+		SpeedMult 1
+	End Metadata
 	E 10,EnemyType1
 End Wave
 Start Wave 2
+	Start Metadata
+		Desc Next wave enemies have lightning resistance.
+		SpeedMult 1
+		LightningMod 0.3
+		HealthMod 1.1
+	End Metadata
 	E 5,EnemyType1
 	E 2,Speeder
 End Wave

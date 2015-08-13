@@ -38,6 +38,17 @@ Beware!! Enemies start coming from last line to first line. Don't start the wave
 
 You should also set the waveCount data in your Metadata block. The game will look for that value when loading waves. If you define your 15th wave but you set your wave count to 13, the game won't see the 14th and 15th waves.
 
+__UPDATE: Wave Metadata block added:
+Properties:
+	-Desc
+	-SpeedMult
+	-PhysicalMod
+	-FireMod
+	-FrostMod
+	-LightningMod
+	-RewardMod
+	-HealthMod
+
 -Decoration Block-
 Simple syntax:
 D[Whitespace][X Coordinate],[Y Coordinate],[Decoration Name]

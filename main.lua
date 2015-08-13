@@ -23,7 +23,7 @@ local tutorialKeyWanted
 local tutorialText
 
 local waitTimer = 0
-
+local waitingText = "Wave 1"
 decorations = {}
 
 hudIcons = {}
@@ -107,6 +107,17 @@ function love.keypressed(key)
 					towerToBuild.sellPrice = towerToBuild.sellPrice + upgradeTower.upgradeCosts.damage * TowerParams.TowerSellPriceMultiplier
 					upgradeTower.upgradeCosts.damage = upgradeTower.upgradeCosts.damage + TowerParams.TowerDamageUpgradeCostIncrease
 				end
+			else
+				local mouseTileX, mouseTileY = platform:getCursor().x, platform:getCursor().y
+				local tIndex = "x"..mouseTileX.."y"..mouseTileY
+				if towers[tIndex] ~= nil then
+					if money >= towers[tIndex].upgradeCosts.damage then
+						towers[tIndex]:setDamage(towers[tIndex].damage + TowerParams.UpgradeDamageIncrease)
+						money = money - towers[tIndex].upgradeCosts.damage
+						towerToBuild.sellPrice = towerToBuild.sellPrice + towers[tIndex].upgradeCosts.damage * TowerParams.TowerSellPriceMultiplier
+						towers[tIndex].upgradeCosts.damage = towers[tIndex].upgradeCosts.damage + TowerParams.TowerDamageUpgradeCostIncrease
+					end
+				end
 			end
 		elseif key == "s" then
 			if buildMode then
@@ -120,6 +131,17 @@ function love.keypressed(key)
 					towerToBuild.sellPrice = towerToBuild.sellPrice + upgradeTower.upgradeCosts.attackRate * TowerParams.TowerSellPriceMultiplier
 					upgradeTower.upgradeCosts.attackRate = upgradeTower.upgradeCosts.attackRate + TowerParams.TowerAttackRateUpgradeCostIncrease
 				end
+			else
+				local mouseTileX, mouseTileY = platform:getCursor().x, platform:getCursor().y
+				local tIndex = "x"..mouseTileX.."y"..mouseTileY
+				if towers[tIndex] ~= nil then
+					if money >= towers[tIndex].upgradeCosts.attackRate then
+						towers[tIndex].attackSpeed = towers[tIndex].attackSpeed + TowerParams.UpgradeAttackRateIncrease
+						money = money - towers[tIndex].upgradeCosts.attackRate
+						towerToBuild.sellPrice = towerToBuild.sellPrice + towers[tIndex].upgradeCosts.attackRate * TowerParams.TowerSellPriceMultiplier
+						towers[tIndex].upgradeCosts.attackRate = towers[tIndex].upgradeCosts.attackRate + TowerParams.TowerAttackRateUpgradeCostIncrease
+					end
+				end
 			end
 		elseif key == "d" then
 			if upgradeMode then
@@ -128,6 +150,17 @@ function love.keypressed(key)
 					money = money - upgradeTower.upgradeCosts.range
 					towerToBuild.sellPrice = towerToBuild.sellPrice + upgradeTower.upgradeCosts.range * TowerParams.TowerSellPriceMultiplier
 					upgradeTower.upgradeCosts.range = upgradeTower.upgradeCosts.range + TowerParams.TowerRangeUpgradeCostIncrease
+				end
+			else
+				local mouseTileX, mouseTileY = platform:getCursor().x, platform:getCursor().y
+				local tIndex = "x"..mouseTileX.."y"..mouseTileY
+				if towers[tIndex] ~= nil then
+					if money >= towers[tIndex].upgradeCosts.range then
+					towers[tIndex].range = towers[tIndex].range + TowerParams.UpgradeRangeIncrease
+					money = money - towers[tIndex].upgradeCosts.range
+					towerToBuild.sellPrice = towerToBuild.sellPrice + towers[tIndex].upgradeCosts.range * TowerParams.TowerSellPriceMultiplier
+					towers[tIndex].upgradeCosts.range = towers[tIndex].upgradeCosts.range + TowerParams.TowerRangeUpgradeCostIncrease
+				end
 				end
 			end
 		elseif key == "l" then
@@ -184,6 +217,32 @@ function drawDebug()
 	end
 end
 
+function drawTowerInfo(tower, x, y)
+	love.graphics.draw(hudIcons.towerInfoFrame, x, y)
+
+	if tower.damageType == Tower.DamageType.Physical then
+		love.graphics.draw(hudIcons.dmgTypePhysical, x + 33, y + 28)
+	elseif tower.damageType == Tower.DamageType.Fire then
+		love.graphics.draw(hudIcons.dmgTypeFire, x + 33, y + 28)
+	elseif tower.damageType == Tower.DamageType.Frost then
+		love.graphics.draw(hudIcons.dmgTypeFrost, x + 33, y + 28)
+	elseif tower.damageType == Tower.DamageType.Lightning then
+		love.graphics.draw(hudIcons.dmgTypeLightning, x + 33, y + 28)
+	end
+
+	love.graphics.setFont(smallFont)
+
+	love.graphics.printf(tower.damage, x + 38, y + 103, 20, "center")
+	love.graphics.printf("A to add +"..TowerParams.UpgradeDamageIncrease.." (Cost: "..tower.upgradeCosts.damage..")", x + 58, y + 93, 100, "center")
+
+	love.graphics.printf(tower.attackSpeed, x + 38, y + 144, 20, "center")
+	love.graphics.printf("S to add +"..TowerParams.UpgradeAttackRateIncrease.." (Cost: "..tower.upgradeCosts.attackRate..")", x + 58, y + 134, 100, "center")
+
+	love.graphics.printf(tower.range, x + 38 + 145, y + 103 - 66, 20, "center")
+	love.graphics.printf("D to add +"..TowerParams.UpgradeRangeIncrease.." (Cost: "..tower.upgradeCosts.range..")", x + 58 + 145, y + 93 - 66, 100, "center")
+
+end
+
 function drawHUD()
 
 	love.graphics.setColor(255, 255, 255)
@@ -205,6 +264,9 @@ function drawHUD()
 	love.graphics.draw(hudIcons.lifeDisplay, love.graphics.getWidth() - 120, 10)
 
 	love.graphics.draw(hudIcons.frame, love.graphics.getWidth() - 200, 100)
+
+
+	
 
 	--DrawText
 
@@ -236,10 +298,20 @@ function drawHUD()
 				"A, S, D to upgrade stats.(Costs:"..upgradeTower.upgradeCosts.damage..","..upgradeTower.upgradeCosts.attackRate..","..upgradeTower.upgradeCosts.range..")\n"..
 				"L to sell the tower.(Take "..upgradeTower.sellPrice.." back)",  love.graphics.getWidth() - 170, 120, 170, "left")
 		else
-			love.graphics.printf("Press B to go into buy mode. Click on a tower to see upgrade options.",  love.graphics.getWidth() - 170, 120, 170, "left")
+			love.graphics.printf("Press B to go into buy mode. Click on a tower to see upgrade options.\n"..
+				""..platform.level.waves[waveNumber+1].metadata.desc,  love.graphics.getWidth() - 170, 120, 170, "left")
 		end
 	end
-	
+	love.graphics.setColor(255, 255, 255)
+	local mouseTileX, mouseTileY = platform:getCursor().x, platform:getCursor().y
+	local tIndex = "x"..mouseTileX.."y"..mouseTileY
+	if towers[tIndex] ~= nil then
+		local towerInfoXOffset = gridSize
+		if mouseTileX * gridSize + 300 > love.graphics.getWidth() then
+			towerInfoXOffset = -300 - gridSize
+		end
+		drawTowerInfo(towers[tIndex], mouseTileX * gridSize + towerInfoXOffset, math.min(mouseTileY * gridSize, love.graphics.getHeight() - 200))
+	end
 
 end
 
@@ -247,9 +319,10 @@ function getRandomColor()
 	return { math.random(0, 255), math.random(0, 255), math.random(0, 255) }
 end
 
-function wait(seconds)
+function wait(seconds, text)
 	state = "waiting"
 	waitTimer = seconds
+	waitingText = text
 end
 
 function love.load()
@@ -271,7 +344,8 @@ function love.load()
 		moneyDisplay = love.graphics.newImage('assets/img/hud_money.png'),
 		lifeDisplay = love.graphics.newImage('assets/img/hud_heart.png'),
 
-		frame = love.graphics.newImage('assets/img/hud_frame.png')
+		frame = love.graphics.newImage('assets/img/hud_frame.png'),
+		towerInfoFrame = love.graphics.newImage('assets/img/hud_turret_frame.png')
 	}
 
 	decorations["house"] = house96x128
@@ -279,6 +353,8 @@ function love.load()
 	platform:loadLevel(1)
 
 	state = "running"
+
+	wait(3, "Wave 1")
 end
 function love.update(dt)
 	if state == "running" then
@@ -287,8 +363,19 @@ function love.update(dt)
 		if(monsterCreateTimer > monsterCreateTimerMax) and table.getn(platform.level.waves[waveNumber]) > 0 then
 			monsterCreateTimer = 0
 			local monster = table.remove(platform.level.waves[waveNumber])
+			--place monster @spawn
 			monster.x = platform.level.spawn.x * gridSize
 			monster.y = platform.level.spawn.y * gridSize
+			--apply wave modifiers
+			monster.speed = monster.speed * platform.level.waves[waveNumber].metadata.speedMult
+			monster.damageModifiers.physical = monster.damageModifiers.physical * platform.level.waves[waveNumber].metadata.physicalMod
+			monster.damageModifiers.fire = monster.damageModifiers.fire * platform.level.waves[waveNumber].metadata.fireMod
+			monster.damageModifiers.frost = monster.damageModifiers.frost * platform.level.waves[waveNumber].metadata.frostMod
+			monster.damageModifiers.lightning = monster.damageModifiers.lightning * platform.level.waves[waveNumber].metadata.lightningMod
+			monster.reward = monster.reward * platform.level.waves[waveNumber].metadata.rewardMod
+			monster.health = monster.health * platform.level.waves[waveNumber].metadata.healthMod
+			monster.maxHealth = monster.maxHealth * platform.level.waves[waveNumber].metadata.healthMod
+
 			table.insert(currentWave, monster)
 		end
 		if(monsterMoveTimer > monsterMoveTimerMax) then
@@ -305,9 +392,8 @@ function love.update(dt)
 		end
 
 		if table.getn(platform.level.waves[waveNumber]) == 0 and table.getn(currentWave) == 0 then
-			wait(5)
 			waveNumber = waveNumber + 1
-			print("Wave "..waveNumber)
+			wait(5, "Wave "..waveNumber)
 			if waveNumber > platform.level.waveCount then
 				print("Level finished")
 				print("YOU WIN")
@@ -385,6 +471,11 @@ function love.draw()
 		platform:drawMonster(monster)
 	end
 	drawHUD()
+	if state == "waiting" then
+		love.graphics.setColor({10, 10, 200})
+		love.graphics.printf(waitingText, 0, love.graphics.getHeight() / 2, love.graphics.getWidth() / 2, "center", 0, 2, 2)
+	end
+
 	if state == "endgame" then
 		love.graphics.setColor({0, 0, 255})
 		love.graphics.printf("YOU'RE WINNER", 0, love.graphics.getHeight() / 2, love.graphics.getWidth() / 2, "center", 0, 2, 2)

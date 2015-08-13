@@ -92,7 +92,44 @@ function Platform:loadLevel(level)
 		for i=1,waveCount do
 			level.waves[i] = {}
 			local waveStr = string.match(contents, "Start Wave "..i..""..splitCharacter.."(.-)End Wave")
-			print(waveStr)
+			local waveMetaStr = string.match(waveStr, "Start Metadata"..splitCharacter.."(.-)End Metadata")
+
+			local metadata = {}
+
+			metadata.desc = ""
+			metadata.speedMult = 1
+			metadata.physicalMod = 1
+			metadata.fireMod = 1
+			metadata.frostMod = 1
+			metadata.lightningMod = 1
+			metadata.rewardMod = 1
+			metadata.healthMod = 1
+
+			local desc = string.match(waveMetaStr, "Desc%s+(.-)"..splitCharacter)
+			local speedMult = string.match(waveMetaStr, "SpeedMult%s+(.-)"..splitCharacter)
+			local physicalMod = string.match(waveMetaStr, "PhysicalMod%s+(.-)"..splitCharacter)
+			local fireMod = string.match(waveMetaStr, "FireMod%s+(.-)"..splitCharacter)
+			local frostMod = string.match(waveMetaStr, "FrostMod%s+(.-)"..splitCharacter)
+			local lightningMod = string.match(waveMetaStr, "LightningMod%s+(.-)"..splitCharacter)
+			local rewardMod = string.match(waveMetaStr, "RewardMod%s+(.-)"..splitCharacter)
+			local healthMod = string.match(waveMetaStr, "HealthMod%s+(.-)"..splitCharacter)
+
+			if healthMod ~= nil then
+				print("HealthMod:"..tonumber(healthMod))
+			end
+			
+
+			if desc then metadata.desc = desc end
+			if speedMult then metadata.speedMult = tonumber(speedMult) end
+			if physicalMod then metadata.physicalMod = tonumber(physicalMod) end
+			if fireMod then metadata.fireMod = tonumber(fireMod) end
+			if frostMod then metadata.frostMod = tonumber(frostMod) end
+			if lightningMod then metadata.lightningMod = tonumber(lightningMod) end
+			if rewardMod then metadata.rewardMod = tonumber(rewardMod) end
+			if healthMod then metadata.healthMod = tonumber(healthMod) end
+
+			level.waves[i].metadata = metadata
+
 			local wave = str_split(waveStr, ""..splitCharacter.."")
 			for k,v in ipairs(wave) do
 				local e_count, e_type = string.match(v, "E%s+(%d-),(.+)")
